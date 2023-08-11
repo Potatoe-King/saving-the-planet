@@ -116,32 +116,22 @@ function eatAndReproduce(consumer, foodSourceArray) {
     consumer.individuals += Math.floor(consumer.individuals * consumer.reproductionRatePerDay);
 }
 
+// Change the function calls to pass the original array
 function simulateDay(wetlandEcosystem) {
-    // Tertiary Consumers eat Secondary Consumers
-    for (let tertiaryConsumer of wetlandEcosystem.tertiaryConsumers) {
-        eatAndReproduce(tertiaryConsumer, [...wetlandEcosystem.secondaryConsumers]);
+    eatAndReproduce(wetlandEcosystem.tertiaryConsumers[0], wetlandEcosystem.secondaryConsumers);
+    eatAndReproduce(wetlandEcosystem.tertiaryConsumers[1], wetlandEcosystem.secondaryConsumers);
+    eatAndReproduce(wetlandEcosystem.secondaryConsumers[0], wetlandEcosystem.primaryConsumers);
+    eatAndReproduce(wetlandEcosystem.secondaryConsumers[1], wetlandEcosystem.primaryConsumers);
+
+    for (let consumer of wetlandEcosystem.primaryConsumers) {
+        eatAndReproduce(consumer, wetlandEcosystem.primaryProducers);
     }
 
-    // Secondary Consumers eat Primary Consumers
-    for (let secondaryConsumer of wetlandEcosystem.secondaryConsumers) {
-        eatAndReproduce(secondaryConsumer, [...wetlandEcosystem.primaryConsumers]);
-    }
-
-    // Primary Consumers eat Primary Producers
-    for (let primaryConsumer of wetlandEcosystem.primaryConsumers) {
-        eatAndReproduce(primaryConsumer, [...wetlandEcosystem.primaryProducers]);
-    }
-
-    // Store previous day's counts
-    for (let category of Object.values(wetlandEcosystem)) {
-        for (let species of category) {
-            species.previousCounts = species.individuals;
-        }
+    // Adding reproduction for primary producers
+    for (let producer of wetlandEcosystem.primaryProducers) {
+        producer.individuals += Math.floor(producer.individuals * producer.reproductionRatePerDay);
     }
 }
-
-// Example Usage:
-simulateDay(wetlandEcosystem);
 
 
 function updateDisplay() {
