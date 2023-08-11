@@ -83,41 +83,38 @@ console.log(wetlandEcosystem);
 
 
 
-function eatAndReproduce(predator, preySpeciesArray) {
-    for (let i = 0; i < predator.individuals; i++) {
-        let foodNeeded = predator.foodRequirementPerDay;
+function eatAndReproduce(consumer, foodSourceArray) {
+    for (let i = 0; i < consumer.individuals; i++) {
+        let foodNeeded = consumer.foodRequirementPerDay;
         let previousFoodNeeded = -1;
 
-        while (foodNeeded > 0 && preySpeciesArray.some(prey => prey.individuals > 0) && foodNeeded !== previousFoodNeeded) {
+        while (foodNeeded > 0 && foodSourceArray.some(food => food.individuals > 0) && foodNeeded !== previousFoodNeeded) {
             previousFoodNeeded = foodNeeded;
-            const randomIndex = Math.floor(Math.random() * preySpeciesArray.length);
-            const prey = preySpeciesArray[randomIndex];
+            const randomIndex = Math.floor(Math.random() * foodSourceArray.length);
+            const food = foodSourceArray[randomIndex];
 
-            if (prey.individuals > 0) {
-                if (prey.foodCount <= foodNeeded) {
-                    foodNeeded -= prey.foodCount;
-                    prey.individuals -= 1;
-                    if (prey.individuals < 0) prey.individuals = 0;  // Ensure count doesn't go negative
+            if (food.individuals > 0) {
+                if (food.foodCount <= foodNeeded) {
+                    foodNeeded -= food.foodCount;
+                    food.individuals -= 1; // The plant is consumed, so its count decreases
+                    if (food.individuals < 0) food.individuals = 0;  // Ensure count doesn't go negative
                 } else {
                     foodNeeded = 0;
                 }
             }
         }
 
-        // If the predator couldn't find enough food, it dies
+        // If the consumer couldn't find enough food, it dies
         if (foodNeeded > 0) {
-            predator.individuals -= 1;
-            if (predator.individuals < 0) predator.individuals = 0;  // Ensure count doesn't go negative
+            consumer.individuals -= 1;
+            if (consumer.individuals < 0) consumer.individuals = 0;  // Ensure count doesn't go negative
             i -= 1;
         }
     }
 
     // Reproduction
-    predator.individuals += Math.floor(predator.individuals * predator.reproductionRatePerDay);
+    consumer.individuals += Math.floor(consumer.individuals * consumer.reproductionRatePerDay);
 }
-
-
-
 
 function simulateDay(wetlandEcosystem) {
     eatAndReproduce(wetlandEcosystem.tertiaryConsumers[0], [...wetlandEcosystem.secondaryConsumers]);
