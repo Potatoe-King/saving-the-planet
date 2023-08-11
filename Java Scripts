@@ -1,0 +1,188 @@
+const wetlandEcosystem = {
+    primaryProducers: [
+        {
+            name: "Water Lily",
+            foodRequirementPerDay: 0,
+            foodCount: 5,
+            reproductionRatePerDay: 1,
+            individuals: 400
+        },
+        {
+            name: "Cattail",
+            foodRequirementPerDay: 0,
+            foodCount: 6,
+            reproductionRatePerDay: 2,
+            individuals: 600
+        }
+    ],
+    primaryConsumers: [
+        {
+            name: "Duck",
+            foodRequirementPerDay: 4,
+            foodCount: 15,
+            reproductionRatePerDay: 0.01,
+            individuals: 150
+        },
+        {
+            name: "Dragonfly nymph",
+            foodRequirementPerDay: 1,
+            foodCount: 2,
+            reproductionRatePerDay: 1,
+            individuals: 2000
+        },
+        {
+            name: "Water Beetle",
+            foodRequirementPerDay: 1,
+            foodCount: 2,
+            reproductionRatePerDay: 1,
+            individuals: 1500
+        },
+        {
+            name: "Snail",
+            foodRequirementPerDay: 0.5,
+            foodCount: 1.5,
+            reproductionRatePerDay: 2,
+            individuals: 800
+        }
+    ],
+    secondaryConsumers: [
+        {
+            name: "Frog",
+            foodRequirementPerDay: 5,
+            foodCount: 7,
+            reproductionRatePerDay: 1,
+            individuals: 500
+        },
+        {
+            name: "Catfish",
+            foodRequirementPerDay: 5,
+            foodCount: 12,
+            reproductionRatePerDay: 0.2,
+            individuals: 300
+        }
+    ],
+    tertiaryConsumers: [
+        {
+            name: "Heron",
+            foodRequirementPerDay: 5,
+            foodCount: 20,
+            reproductionRatePerDay: 0.007,
+            individuals: 50
+        },
+        {
+            name: "Otter",
+            foodRequirementPerDay: 6,
+            foodCount: 30,
+            reproductionRatePerDay: 0.005,
+            individuals: 20
+        }
+    ]
+};
+
+console.log(wetlandEcosystem);
+
+
+
+function eatAndReproduce(predator, preySpeciesArray) {
+    for (let i = 0; i < predator.individuals; i++) {
+        let foodNeeded = predator.foodRequirementPerDay;
+
+        // Try to find prey until the food requirement is met or no more prey available
+        while (foodNeeded > 0 && preySpeciesArray.some(prey => prey.individuals > 0)) {
+            const randomIndex = Math.floor(Math.random() * preySpeciesArray.length);
+            const prey = preySpeciesArray[randomIndex];
+
+            if (prey.individuals > 0) {
+                if (prey.foodCount <= foodNeeded) {
+                    foodNeeded -= prey.foodCount;
+                    prey.individuals -= 1;  // The prey is eaten and its count decreases
+                } else {
+                    foodNeeded = 0;
+                }
+            }
+        }
+
+        // If the predator couldn't find enough food, it dies
+        if (foodNeeded > 0) {
+            predator.individuals -= 1;
+            i -= 1;
+        }
+    }
+
+    // Reproduction
+    predator.individuals += Math.floor(predator.individuals * predator.reproductionRatePerDay);
+}
+
+
+function simulateDay(wetlandEcosystem) {
+    eatAndReproduce(wetlandEcosystem.tertiaryConsumers[0], [...wetlandEcosystem.secondaryConsumers]);
+    eatAndReproduce(wetlandEcosystem.tertiaryConsumers[1], [...wetlandEcosystem.secondaryConsumers]);
+    eatAndReproduce(wetlandEcosystem.secondaryConsumers[0], [...wetlandEcosystem.primaryConsumers]);
+    eatAndReproduce(wetlandEcosystem.secondaryConsumers[1], [...wetlandEcosystem.primaryConsumers]);
+
+    for (let consumer of wetlandEcosystem.primaryConsumers) {
+        eatAndReproduce(consumer, [...wetlandEcosystem.primaryProducers]);
+    }
+}
+
+function updateDisplay() {
+    const tbody = document.getElementById('ecosystemData');
+    tbody.innerHTML = '';  // Clear the current data
+
+    for (let level in wetlandEcosystem) {
+        for (let species of wetlandEcosystem[level]) {
+            const row = tbody.insertRow();
+            const cell1 = row.insertCell(0);
+            const cell2 = row.insertCell(1);
+
+            cell1.textContent = species.name;
+            cell2.textContent = species.individuals;
+        }
+    }
+}
+
+function simulateDayAndDisplay() {
+    // Store the current counts as the previous counts
+    for (let level in wetlandEcosystem) {
+        for (let species of wetlandEcosystem[level]) {
+            species.previousCounts = species.individuals;
+        }
+    }
+
+    simulateDay(wetlandEcosystem);
+    updateDisplay();
+}
+
+function updateDisplay() {
+    const tbody = document.getElementById('ecosystemData');
+    tbody.innerHTML = '';  // Clear the current data
+
+    for (let level in wetlandEcosystem) {
+        for (let species of wetlandEcosystem[level]) {
+            const row = tbody.insertRow();
+            const cell1 = row.insertCell(0);
+            const cell2 = row.insertCell(1);
+            const cell3 = row.insertCell(2);
+
+            cell1.textContent = species.name;
+            cell2.textContent = species.individuals;
+            
+            // Display the difference from the previous day
+            const difference = species.individuals - (species.previousCounts || species.individuals);
+            cell3.textContent = difference >= 0 ? `+${difference}` : difference;
+        }
+    }
+}
+
+
+// Event Listener for simulating multiple days
+document.getElementById("multiSimulate").addEventListener("click", function() {
+    const numDays = parseInt(document.getElementById("daysInput").value) || 0;
+    for (let i = 0; i < numDays; i++) {
+        simulateDay(wetlandEcosystem);
+    }
+    updateDisplay();
+});
+
+// Initialize the display on page load
+window.onload = updateDisplay;
