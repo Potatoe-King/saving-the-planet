@@ -86,10 +86,8 @@ console.log(wetlandEcosystem);
 function eatAndReproduce(predator, preySpeciesArray) {
     for (let i = 0; i < predator.individuals; i++) {
         let foodNeeded = predator.foodRequirementPerDay;
-        let previousFoodNeeded = -1;  // Set an initial value that's different from foodNeeded
+        let previousFoodNeeded = -1;
 
-        // Try to find prey until the food requirement is met, no more prey available, 
-        // or the foodNeeded value isn't changing (indicating no more available prey)
         while (foodNeeded > 0 && preySpeciesArray.some(prey => prey.individuals > 0) && foodNeeded !== previousFoodNeeded) {
             previousFoodNeeded = foodNeeded;
             const randomIndex = Math.floor(Math.random() * preySpeciesArray.length);
@@ -98,7 +96,8 @@ function eatAndReproduce(predator, preySpeciesArray) {
             if (prey.individuals > 0) {
                 if (prey.foodCount <= foodNeeded) {
                     foodNeeded -= prey.foodCount;
-                    prey.individuals -= 1;  // The prey is eaten and its count decreases
+                    prey.individuals -= 1;
+                    if (prey.individuals < 0) prey.individuals = 0;  // Ensure count doesn't go negative
                 } else {
                     foodNeeded = 0;
                 }
@@ -108,6 +107,7 @@ function eatAndReproduce(predator, preySpeciesArray) {
         // If the predator couldn't find enough food, it dies
         if (foodNeeded > 0) {
             predator.individuals -= 1;
+            if (predator.individuals < 0) predator.individuals = 0;  // Ensure count doesn't go negative
             i -= 1;
         }
     }
@@ -115,6 +115,7 @@ function eatAndReproduce(predator, preySpeciesArray) {
     // Reproduction
     predator.individuals += Math.floor(predator.individuals * predator.reproductionRatePerDay);
 }
+
 
 
 
