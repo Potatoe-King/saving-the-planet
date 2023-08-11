@@ -117,15 +117,32 @@ function eatAndReproduce(consumer, foodSourceArray) {
 }
 
 function simulateDay(wetlandEcosystem) {
-    eatAndReproduce(wetlandEcosystem.tertiaryConsumers[0], [...wetlandEcosystem.secondaryConsumers]);
-    eatAndReproduce(wetlandEcosystem.tertiaryConsumers[1], [...wetlandEcosystem.secondaryConsumers]);
-    eatAndReproduce(wetlandEcosystem.secondaryConsumers[0], [...wetlandEcosystem.primaryConsumers]);
-    eatAndReproduce(wetlandEcosystem.secondaryConsumers[1], [...wetlandEcosystem.primaryConsumers]);
+    // Tertiary Consumers eat Secondary Consumers
+    for (let tertiaryConsumer of wetlandEcosystem.tertiaryConsumers) {
+        eatAndReproduce(tertiaryConsumer, [...wetlandEcosystem.secondaryConsumers]);
+    }
 
-    for (let consumer of wetlandEcosystem.primaryConsumers) {
-        eatAndReproduce(consumer, [...wetlandEcosystem.primaryProducers]);
+    // Secondary Consumers eat Primary Consumers
+    for (let secondaryConsumer of wetlandEcosystem.secondaryConsumers) {
+        eatAndReproduce(secondaryConsumer, [...wetlandEcosystem.primaryConsumers]);
+    }
+
+    // Primary Consumers eat Primary Producers
+    for (let primaryConsumer of wetlandEcosystem.primaryConsumers) {
+        eatAndReproduce(primaryConsumer, [...wetlandEcosystem.primaryProducers]);
+    }
+
+    // Store previous day's counts
+    for (let category of Object.values(wetlandEcosystem)) {
+        for (let species of category) {
+            species.previousCounts = species.individuals;
+        }
     }
 }
+
+// Example Usage:
+simulateDay(wetlandEcosystem);
+
 
 function updateDisplay() {
     const tbody = document.getElementById('ecosystemData');
